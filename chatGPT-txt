@@ -1,0 +1,10 @@
+Bitte mache mir eine App in React.js mit create-react-app, mit Typescript und tailwind für styling.
+Mache ein Roulette-Tableau mit 36 Knöpfen mit den Farben wie auf dem Roulette-Tableau.
+Wenn ich auf einen Knopf klicke, gib einen Text aus "Gefallene Nr: X", wobei X die Nummer ist, die ich geklickt habe.
+
+Ich möchte, dass die gefallenen Nummern in ein Array gespeichert werden. 
+Der ausgegebene Text soll angepasst werden: Gefallene Nummern: x, x, x.
+Ausserdem soll es einen Rückgängig-Knopf geben der die letzte Nummer aus dem Array löscht
+
+
+Bitte mache einen 
