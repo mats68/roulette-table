@@ -10,17 +10,19 @@ const App: React.FC = () => {
   const [showTable, setShowTable] = useState(false);
   const [title, setTitle] = useState<string | null>(null);
   const [fallenNumbers, setFallenNumbers] = useState<number[]>([]);
-  const [result, setResult] = useState<number>(0);
+  const [result, setResult] = useState<number>(0); // Gesamtergebnis
+  const [roundResult, setRoundResult] = useState<number>(0); // Ergebnis der aktuellen Runde
   const [betSize, setBetSize] = useState(10);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const redNumbers = [
-    1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+    1, 3, 5, 7, 9, 12, 14, 16, 18,
+    19, 21, 23, 25, 27, 30, 32, 34, 36,
   ];
 
   const handleSelectMode = (selectedTitle: string) => {
     setTitle(selectedTitle);
-    if (selectedTitle === "Paroli-System" || selectedTitle === "Double-Dozens") {
+    if (selectedTitle === 'Paroli-System' || selectedTitle === 'Double-Dozens') {
       setShowForm(true);
     } else {
       setShowTable(true);
@@ -30,36 +32,38 @@ const App: React.FC = () => {
   const handleNumberClick = (number: number) => {
     setFallenNumbers((prevNumbers) => [...prevNumbers, number]);
 
-    let roundResult = 0;
-    if (title === "Paroli-System") {
-      roundResult = checkParoliWin(number);
-    } else if (title === "Double-Dozens") {
-      roundResult = checkDoubleDozensWin(number);
+    let currentRoundResult = 0;
+    if (title === 'Paroli-System') {
+      currentRoundResult = checkParoliWin(number);
+    } else if (title === 'Double-Dozens') {
+      currentRoundResult = checkDoubleDozensWin(number);
     }
 
-    setResult((prevResult) => prevResult + roundResult);
+    setRoundResult(currentRoundResult);
+    setResult((prevResult) => prevResult + currentRoundResult);
   };
 
   const checkParoliWin = (number: number) => {
     let winAmount = 0;
 
-    if (selectedOptions.includes("Rot") && redNumbers.includes(number)) {
-      winAmount += betSize;
+    // Prüfen, ob jede ausgewählte einfache Chance erfüllt ist oder nicht
+    if (selectedOptions.includes('Rot')) {
+      winAmount += redNumbers.includes(number) ? betSize : -betSize;
     }
-    if (selectedOptions.includes("Schwarz") && !redNumbers.includes(number)) {
-      winAmount += betSize;
+    if (selectedOptions.includes('Schwarz')) {
+      winAmount += !redNumbers.includes(number) && number !== 0 ? betSize : -betSize;
     }
-    if (selectedOptions.includes("Ungerade") && number % 2 !== 0) {
-      winAmount += betSize;
+    if (selectedOptions.includes('Ungerade')) {
+      winAmount += number % 2 !== 0 && number !== 0 ? betSize : -betSize;
     }
-    if (selectedOptions.includes("Gerade") && number % 2 === 0) {
-      winAmount += betSize;
+    if (selectedOptions.includes('Gerade')) {
+      winAmount += number % 2 === 0 && number !== 0 ? betSize : -betSize;
     }
-    if (selectedOptions.includes("1–18") && number >= 1 && number <= 18) {
-      winAmount += betSize;
+    if (selectedOptions.includes('1–18')) {
+      winAmount += number >= 1 && number <= 18 ? betSize : -betSize;
     }
-    if (selectedOptions.includes("19–36") && number >= 19 && number <= 36) {
-      winAmount += betSize;
+    if (selectedOptions.includes('19–36')) {
+      winAmount += number >= 19 && number <= 36 ? betSize : -betSize;
     }
 
     return winAmount;
@@ -67,11 +71,13 @@ const App: React.FC = () => {
 
   const checkDoubleDozensWin = (number: number) => {
     // Beispielhafte Gewinnbedingung für das Double-Dozens-System
+    // Hier sollten Sie die tatsächliche Gewinnlogik für Double-Dozens implementieren
     return number >= 13 && number <= 24 ? betSize : -betSize;
   };
 
   const handleUndo = () => {
     setFallenNumbers((prevNumbers) => prevNumbers.slice(0, -1));
+    // Hier könnten Sie auch die Berechnung des Ergebnisses rückgängig machen
   };
 
   const handleStartRoulette = () => {
@@ -92,8 +98,10 @@ const App: React.FC = () => {
         <ModeButtons onSelectMode={handleSelectMode} />
       ) : showForm ? (
         <>
-          {title && <h2 className="text-2xl font-semibold mb-4">{title}</h2>}
-          {title === "Paroli-System" ? (
+          {title && (
+            <h2 className="text-2xl font-semibold mb-4">{title}</h2>
+          )}
+          {title === 'Paroli-System' ? (
             <ParoliSystemForm
               onStart={handleStartRoulette}
               onUpdateBetSettings={updateBetSettings}
@@ -104,12 +112,15 @@ const App: React.FC = () => {
         </>
       ) : (
         <>
-          {title && <h2 className="text-2xl font-semibold mb-4">{title}</h2>}
+          {title && (
+            <h2 className="text-2xl font-semibold mb-4">{title}</h2>
+          )}
           <RouletteTable
             onNumberClick={handleNumberClick}
             fallenNumbers={fallenNumbers}
             onUndo={handleUndo}
             result={`Gesamtergebnis: ${result}`}
+            roundResult={`Ergebnis der Runde: ${roundResult}`}
           />
         </>
       )}

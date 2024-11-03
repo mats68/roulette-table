@@ -5,7 +5,8 @@ interface RouletteTableProps {
   onNumberClick: (number: number) => void;
   fallenNumbers: number[];
   onUndo: () => void;
-  result: string | null; // Neue Prop für das Ergebnis
+  result: string; // Gesamtergebnis
+  roundResult: string; // Ergebnis der aktuellen Runde
 }
 
 const RouletteTable: React.FC<RouletteTableProps> = ({
@@ -13,6 +14,7 @@ const RouletteTable: React.FC<RouletteTableProps> = ({
   fallenNumbers,
   onUndo,
   result,
+  roundResult,
 }) => {
   const numbers = Array.from({ length: 36 }, (_, i) => i + 1);
   const redNumbers = [
@@ -48,11 +50,12 @@ const RouletteTable: React.FC<RouletteTableProps> = ({
         Gefallene Nummern: {fallenNumbers.join(', ')}
       </div>
 
-      {result && (
-        <div className="text-lg font-semibold text-center mt-4">
-          {result}
-        </div>
-      )}
+      <div className="text-lg font-semibold text-center mt-4">
+        {roundResult}
+      </div>
+      <div className="text-lg font-semibold text-center mt-2">
+        {result}
+      </div>
 
       <button
         onClick={onUndo}
