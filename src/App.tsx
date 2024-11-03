@@ -18,7 +18,23 @@ const App: React.FC = () => {
   const [fallenNumbers, setFallenNumbers] = useState<number[]>([]);
   const [result, setResult] = useState<number>(0); // Gesamtergebnis
   const [roundResult, setRoundResult] = useState<number>(0); // Ergebnis der aktuellen Runde
-  const [betSize, setBetSize] = useState(10);
+  const [betSize, setBetSize] = useState<{ [key: string]: number }>({
+    Rot: 10,
+    Schwarz: 10,
+    Ungerade: 10,
+    Gerade: 10,
+    '1–18': 10,
+    '19–36': 10,
+  });
+  const initialBetSize = 10;
+  const [winStreak, setWinStreak] = useState<{ [key: string]: number }>({
+    Rot: 0,
+    Schwarz: 0,
+    Ungerade: 0,
+    Gerade: 0,
+    '1–18': 0,
+    '19–36': 0,
+  });
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]); // Verlaufsprotokoll
 
@@ -38,15 +54,41 @@ const App: React.FC = () => {
 
   const handleNumberClick = (number: number) => {
     let currentRoundResult = 0;
-    if (title === 'Paroli-System') {
-      currentRoundResult = checkParoliWin(number);
-    } else if (title === 'Double-Dozens') {
-      currentRoundResult = checkDoubleDozensWin(number);
-    }
+    let newBetSize = { ...betSize };
+    let newWinStreak = { ...winStreak };
+
+    selectedOptions.forEach((option) => {
+      let isWin = false;
+
+      if (
+        (option === 'Rot' && redNumbers.includes(number)) ||
+        (option === 'Schwarz' && !redNumbers.includes(number) && number !== 0) ||
+        (option === 'Ungerade' && number % 2 !== 0 && number !== 0) ||
+        (option === 'Gerade' && number % 2 === 0 && number !== 0) ||
+        (option === '1–18' && number >= 1 && number <= 18) ||
+        (option === '19–36' && number >= 19 && number <= 36)
+      ) {
+        isWin = true;
+      }
+
+      if (isWin) {
+        currentRoundResult += newBetSize[option];
+        newWinStreak[option] += 1;
+        if (newWinStreak[option] === 3) {
+          newBetSize[option] = initialBetSize;
+          newWinStreak[option] = 0; 
+        } else {
+          newBetSize[option] *= 2;
+        }
+      } else {
+        currentRoundResult -= newBetSize[option];
+        newWinStreak[option] = 0; 
+        newBetSize[option] = initialBetSize;
+      }
+    });
 
     const newResult = result + currentRoundResult;
 
-    // Zustand in die Historie hinzufügen
     setHistory((prevHistory) => [
       ...prevHistory,
       { number, roundResult: currentRoundResult, result }
@@ -55,50 +97,16 @@ const App: React.FC = () => {
     setFallenNumbers((prevNumbers) => [...prevNumbers, number]);
     setRoundResult(currentRoundResult);
     setResult(newResult);
-  };
-
-  const checkParoliWin = (number: number) => {
-    let winAmount = 0;
-
-    // Prüfen, ob jede ausgewählte einfache Chance erfüllt ist oder nicht
-    if (selectedOptions.includes('Rot')) {
-      winAmount += redNumbers.includes(number) ? betSize : -betSize;
-    }
-    if (selectedOptions.includes('Schwarz')) {
-      winAmount += !redNumbers.includes(number) && number !== 0 ? betSize : -betSize;
-    }
-    if (selectedOptions.includes('Ungerade')) {
-      winAmount += number % 2 !== 0 && number !== 0 ? betSize : -betSize;
-    }
-    if (selectedOptions.includes('Gerade')) {
-      winAmount += number % 2 === 0 && number !== 0 ? betSize : -betSize;
-    }
-    if (selectedOptions.includes('1–18')) {
-      winAmount += number >= 1 && number <= 18 ? betSize : -betSize;
-    }
-    if (selectedOptions.includes('19–36')) {
-      winAmount += number >= 19 && number <= 36 ? betSize : -betSize;
-    }
-
-    return winAmount;
-  };
-
-  const checkDoubleDozensWin = (number: number) => {
-    return number >= 13 && number <= 24 ? betSize : -betSize;
+    setBetSize(newBetSize);
+    setWinStreak(newWinStreak);
   };
 
   const handleUndo = () => {
     if (history.length > 0) {
-      // Letzten Zustand aus der Historie abrufen
       const lastEntry = history[history.length - 1];
-
-      setFallenNumbers((prevNumbers) =>
-        prevNumbers.slice(0, -1)
-      );
+      setFallenNumbers((prevNumbers) => prevNumbers.slice(0, -1));
       setRoundResult(lastEntry.roundResult);
       setResult(lastEntry.result);
-
-      // Letztes Element aus der Historie entfernen
       setHistory((prevHistory) => prevHistory.slice(0, -1));
     }
   };
@@ -109,7 +117,11 @@ const App: React.FC = () => {
   };
 
   const updateBetSettings = (size: number, options: string[]) => {
-    setBetSize(size);
+    const initialSizes = options.reduce((acc, option) => {
+      acc[option] = size;
+      return acc;
+    }, {} as { [key: string]: number });
+    setBetSize(initialSizes);
     setSelectedOptions(options);
   };
 
@@ -138,6 +150,20 @@ const App: React.FC = () => {
           {title && (
             <h2 className="text-2xl font-semibold mb-4">{title}</h2>
           )}
+          {/* Anzeige der aktuellen Einsatzgrößen */}
+          {title === 'Paroli-System' && selectedOptions.length > 0 && (
+            <div className="text-lg font-medium mb-4">
+              Setzen:{' '}
+              {selectedOptions.map((option, index) => (
+                <span key={option}>
+                  {option}:{' '}
+                  <span className="font-bold">{betSize[option]}</span>
+                  {index < selectedOptions.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </div>
+          )}
+
           <RouletteTable
             onNumberClick={handleNumberClick}
             fallenNumbers={fallenNumbers}

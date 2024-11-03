@@ -44,3 +44,37 @@ Ich will dass das gesamtergebnis in der result variable gespeichert wird.
 
 ich möchte dass checkParoliWin für jede gewählte einfache chance das resultat kumuliert. 
 also z.B. schwarz und 19-36 bei der gefallenen Zahl 33 wäre das resultat +20
+
+Ich will, falls eine einfache Chance gewinnt, der Gewinn für diese einfache Chance zur Betsize hinzugefügt wird.
+Es soll versucht werden, eine einfache Chance 3-mal hintereinander zu gewinnen, Falls eine einfache Chance 3-mal hintereinander gewinnt,
+wird die Betsize wieder auf die ursprüngliche Betsize angepasst.
+Beispiel: Gewählte einfache Chancen: "Schwarz" und "19–36", betsize 10
+1. gefallene Zahl: 2 
+   Neue Betsize:
+   "Schwarz": 20
+   "19–36": 10
+2. gefallene Zahl: 4
+   Neue Betsize:
+   "Schwarz": 40
+   "19–36": 10
+3. gefallene Zahl: 22
+   Neue Betsize:
+   "Schwarz": 80
+   "19–36": 20
+4. gefallene Zahl: 28
+   Neue Betsize:
+   "Schwarz": 10
+   "19–36": 40
+5. gefallene Zahl: 5
+   Neue Betsize:
+   "Schwarz": 10
+   "19–36": 10
+
+Ich will, dass die Neue Betsize in einem Textfeld nach dem Titel "Paroli-System" in einem Textfeld angezeigt wird.
+Falls ich z.B. einfache Chancen: "Schwarz" und "19–36" gewählt habe:
+"Setzen: Schwarz: x, 19–36: y"
+wobei x und y die neue Betsize beinhalten (und fettschrift)
+
+
+
+
