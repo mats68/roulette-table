@@ -5,6 +5,12 @@ import ParoliSystemForm from './components/systems/ParoliSystemForm';
 import DoubleDozensForm from './components/systems/DoubleDozensForm';
 import RouletteTable from './components/RouletteTable';
 
+interface HistoryEntry {
+  number: number;
+  roundResult: number;
+  result: number;
+}
+
 const App: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [showTable, setShowTable] = useState(false);
@@ -14,6 +20,7 @@ const App: React.FC = () => {
   const [roundResult, setRoundResult] = useState<number>(0); // Ergebnis der aktuellen Runde
   const [betSize, setBetSize] = useState(10);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]); // Verlaufsprotokoll
 
   const redNumbers = [
     1, 3, 5, 7, 9, 12, 14, 16, 18,
@@ -30,8 +37,6 @@ const App: React.FC = () => {
   };
 
   const handleNumberClick = (number: number) => {
-    setFallenNumbers((prevNumbers) => [...prevNumbers, number]);
-
     let currentRoundResult = 0;
     if (title === 'Paroli-System') {
       currentRoundResult = checkParoliWin(number);
@@ -39,8 +44,17 @@ const App: React.FC = () => {
       currentRoundResult = checkDoubleDozensWin(number);
     }
 
+    const newResult = result + currentRoundResult;
+
+    // Zustand in die Historie hinzufügen
+    setHistory((prevHistory) => [
+      ...prevHistory,
+      { number, roundResult: currentRoundResult, result }
+    ]);
+
+    setFallenNumbers((prevNumbers) => [...prevNumbers, number]);
     setRoundResult(currentRoundResult);
-    setResult((prevResult) => prevResult + currentRoundResult);
+    setResult(newResult);
   };
 
   const checkParoliWin = (number: number) => {
@@ -70,14 +84,23 @@ const App: React.FC = () => {
   };
 
   const checkDoubleDozensWin = (number: number) => {
-    // Beispielhafte Gewinnbedingung für das Double-Dozens-System
-    // Hier sollten Sie die tatsächliche Gewinnlogik für Double-Dozens implementieren
     return number >= 13 && number <= 24 ? betSize : -betSize;
   };
 
   const handleUndo = () => {
-    setFallenNumbers((prevNumbers) => prevNumbers.slice(0, -1));
-    // Hier könnten Sie auch die Berechnung des Ergebnisses rückgängig machen
+    if (history.length > 0) {
+      // Letzten Zustand aus der Historie abrufen
+      const lastEntry = history[history.length - 1];
+
+      setFallenNumbers((prevNumbers) =>
+        prevNumbers.slice(0, -1)
+      );
+      setRoundResult(lastEntry.roundResult);
+      setResult(lastEntry.result);
+
+      // Letztes Element aus der Historie entfernen
+      setHistory((prevHistory) => prevHistory.slice(0, -1));
+    }
   };
 
   const handleStartRoulette = () => {
