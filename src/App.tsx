@@ -1,84 +1,118 @@
+// src/App.tsx
 import React, { useState } from 'react';
-
-const rouletteNumbers = [
-  { number: 0, color: 'bg-green-600' },
-  { number: 1, color: 'bg-red-600' },
-  { number: 2, color: 'bg-black' },
-  { number: 3, color: 'bg-red-600' },
-  { number: 4, color: 'bg-black' },
-  { number: 5, color: 'bg-red-600' },
-  { number: 6, color: 'bg-black' },
-  { number: 7, color: 'bg-red-600' },
-  { number: 8, color: 'bg-black' },
-  { number: 9, color: 'bg-red-600' },
-  { number: 10, color: 'bg-black' },
-  { number: 11, color: 'bg-black' },
-  { number: 12, color: 'bg-red-600' },
-  { number: 13, color: 'bg-black' },
-  { number: 14, color: 'bg-red-600' },
-  { number: 15, color: 'bg-black' },
-  { number: 16, color: 'bg-red-600' },
-  { number: 17, color: 'bg-black' },
-  { number: 18, color: 'bg-red-600' },
-  { number: 19, color: 'bg-red-600' },
-  { number: 20, color: 'bg-black' },
-  { number: 21, color: 'bg-red-600' },
-  { number: 22, color: 'bg-black' },
-  { number: 23, color: 'bg-red-600' },
-  { number: 24, color: 'bg-black' },
-  { number: 25, color: 'bg-red-600' },
-  { number: 26, color: 'bg-black' },
-  { number: 27, color: 'bg-red-600' },
-  { number: 28, color: 'bg-black' },
-  { number: 29, color: 'bg-black' },
-  { number: 30, color: 'bg-red-600' },
-  { number: 31, color: 'bg-black' },
-  { number: 32, color: 'bg-red-600' },
-  { number: 33, color: 'bg-black' },
-  { number: 34, color: 'bg-red-600' },
-  { number: 35, color: 'bg-black' },
-  { number: 36, color: 'bg-red-600' },
-];
+import ModeButtons from './components/ModeButtons';
+import ParoliSystemForm from './components/systems/ParoliSystemForm';
+import DoubleDozensForm from './components/systems/DoubleDozensForm';
+import RouletteTable from './components/RouletteTable';
 
 const App: React.FC = () => {
+  const [showForm, setShowForm] = useState(false);
+  const [showTable, setShowTable] = useState(false);
+  const [title, setTitle] = useState<string | null>(null);
   const [fallenNumbers, setFallenNumbers] = useState<number[]>([]);
+  const [result, setResult] = useState<number>(0);
+  const [betSize, setBetSize] = useState(10);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  const handleClick = (number: number) => {
+  const redNumbers = [
+    1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+  ];
+
+  const handleSelectMode = (selectedTitle: string) => {
+    setTitle(selectedTitle);
+    if (selectedTitle === "Paroli-System" || selectedTitle === "Double-Dozens") {
+      setShowForm(true);
+    } else {
+      setShowTable(true);
+    }
+  };
+
+  const handleNumberClick = (number: number) => {
     setFallenNumbers((prevNumbers) => [...prevNumbers, number]);
+
+    let roundResult = 0;
+    if (title === "Paroli-System") {
+      roundResult = checkParoliWin(number);
+    } else if (title === "Double-Dozens") {
+      roundResult = checkDoubleDozensWin(number);
+    }
+
+    setResult((prevResult) => prevResult + roundResult);
+  };
+
+  const checkParoliWin = (number: number) => {
+    let winAmount = 0;
+
+    if (selectedOptions.includes("Rot") && redNumbers.includes(number)) {
+      winAmount += betSize;
+    }
+    if (selectedOptions.includes("Schwarz") && !redNumbers.includes(number)) {
+      winAmount += betSize;
+    }
+    if (selectedOptions.includes("Ungerade") && number % 2 !== 0) {
+      winAmount += betSize;
+    }
+    if (selectedOptions.includes("Gerade") && number % 2 === 0) {
+      winAmount += betSize;
+    }
+    if (selectedOptions.includes("1–18") && number >= 1 && number <= 18) {
+      winAmount += betSize;
+    }
+    if (selectedOptions.includes("19–36") && number >= 19 && number <= 36) {
+      winAmount += betSize;
+    }
+
+    return winAmount;
+  };
+
+  const checkDoubleDozensWin = (number: number) => {
+    // Beispielhafte Gewinnbedingung für das Double-Dozens-System
+    return number >= 13 && number <= 24 ? betSize : -betSize;
   };
 
   const handleUndo = () => {
     setFallenNumbers((prevNumbers) => prevNumbers.slice(0, -1));
   };
 
+  const handleStartRoulette = () => {
+    setShowForm(false);
+    setShowTable(true);
+  };
+
+  const updateBetSettings = (size: number, options: string[]) => {
+    setBetSize(size);
+    setSelectedOptions(options);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 className="text-3xl font-bold mb-8">Roulette Table</h1>
-      <div className="grid grid-cols-6 gap-2 mb-8">
-        {rouletteNumbers.map(({ number, color }) => (
-          <button
-            key={number}
-            className={`w-16 h-16 text-white font-bold ${color} rounded-full flex items-center justify-center`}
-            onClick={() => handleClick(number)}
-          >
-            {number}
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-col items-center">
-        {fallenNumbers.length > 0 && (
-          <p className="text-xl mb-4">
-            Gefallene Nummern: {fallenNumbers.join(', ')}
-          </p>
-        )}
-        <button
-          onClick={handleUndo}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          disabled={fallenNumbers.length === 0}
-        >
-          Rückgängig
-        </button>
-      </div>
+
+      {!showForm && !showTable ? (
+        <ModeButtons onSelectMode={handleSelectMode} />
+      ) : showForm ? (
+        <>
+          {title && <h2 className="text-2xl font-semibold mb-4">{title}</h2>}
+          {title === "Paroli-System" ? (
+            <ParoliSystemForm
+              onStart={handleStartRoulette}
+              onUpdateBetSettings={updateBetSettings}
+            />
+          ) : (
+            <DoubleDozensForm onStart={handleStartRoulette} />
+          )}
+        </>
+      ) : (
+        <>
+          {title && <h2 className="text-2xl font-semibold mb-4">{title}</h2>}
+          <RouletteTable
+            onNumberClick={handleNumberClick}
+            fallenNumbers={fallenNumbers}
+            onUndo={handleUndo}
+            result={`Gesamtergebnis: ${result}`}
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -7,4 +7,40 @@ Der ausgegebene Text soll angepasst werden: Gefallene Nummern: x, x, x.
 Ausserdem soll es einen Rückgängig-Knopf geben der die letzte Nummer aus dem Array löscht
 
 
-Bitte mache einen 
+Bitte mache einen Knopf "Paroli-System" am Anfang. Der Rest der App soll erst angezeigt werden, wenn ich 
+auf den Knopf gedrückt habe. Nach dem Titel soll soll eine Überschrift mit dem Titel des gedrückten Knopfs sein.
+
+Bitte speichere "Paroli-System" in eine State Variable
+
+Mache einen zweiten Knopf "Double-Dozens", der so funktioniert wie  "Paroli-System"
+
+Bitte verschiebe den Code des Roulette-Table in eine eigene Datei, und die Knöpfe 
+
+Bitte verschiebe die Logik der Knöpfe "Double-Dozens" und  "Paroli-System" in eine eigene Datei, und den
+Roulette Table auch in eine eigene Datei.
+
+Wenn ich auf den Knopf "Paroli-System" klicke, dann zeige bitte einige Eingabefelder an:
+"Wettgrösse": Numerisches Eingebafeld mit Defaultwert 10
+"Gewinnziel": Numerisches Eingebafeld mit Defaultwert 200
+"Gewählte Einfache Chancen": 6 Checkboxen: "Rot" , "Schwarz", "Ungerade", "Gerade", "1–18", "19–36"
+Zeige weiter unten einen Knopf "Los" an, falls ich den klicke, zeige den Roulette-Table an.
+Bitte benutze eine separate Datei in einem separaten Unterordner für diese Komponente.
+
+Mach dasselbe für den Knopf "Double-Dozens", zeige aber nur die Eingabefelder "Wettgrösse" und "Gewinnziel" an
+
+Der "0" Knopf beim Roulette-Table muss auf einer eigenen Zeile zentriert sein
+
+Falls der Knopf "Paroli-System" gewählt wurde, soll ein Roulette-System getestet werden:
+Es wird ein Einsatz getätigt gemäss "Wettgrösse".
+Nachdem der Benutzer einen Zahlen-Knopf gewählt hat, soll ermittelt werden, ob die gewählten einfachen Chancen
+gemäss "Gewählte Einfache Chancen" gewonnen oder verloren hat. 
+Der aktuelle Gewinn/Verlust wird mit einem Text "Ergebnis: x"
+Bei einem Verlust: "Ergebnis: -10"
+Bei einem Gewinn: "Ergebnis: +10"
+Bitte den Code dazu in der Datei "ParoliSystemForm.tsx" implementieren.
+
+handleNumberClick soll später je nach System unterschiedlich sein.
+Ich will dass das gesamtergebnis in der result variable gespeichert wird.
+
+ich möchte dass checkParoliWin für jede gewählte einfache chance das resultat kumuliert. 
+also z.B. schwarz und 19-36 bei der gefallenen Zahl 33 wäre das resultat +20
